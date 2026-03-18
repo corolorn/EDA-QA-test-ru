@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDA-QA Test</title>
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration and Custom Animations -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'slide-up': 'slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        slideUpFade: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS for scrollbar -->
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #18181b; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3f3f46; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #52525b; 
+        }
+        /* Utility to hide elements */
+        .hidden-view {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 font-sans custom-scrollbar min-h-screen flex flex-col">
+
+    <!-- INTRO VIEW -->
+    <div id="intro-view" class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6">
+        <div class="max-w-3xl w-full bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-800 p-8 sm:p-12 animate-slide-up">
+            <div class="inline-block px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full text-sm font-semibold tracking-wide mb-6">
+                Психологический опросник
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-6 leading-tight">
+                Опросник экстремального избегания требований <span class="text-indigo-400">(EDA-QA)</span>
+            </h1>
+            
+            <div class="space-y-6 text-zinc-400 text-base sm:text-lg leading-relaxed mb-10">
+                <p>
+                    Этот инструмент разработан для выявления специфических черт поведения. PDA (Pathological Demand Avoidance) или патологическое избегание требований: это профиль аутистического спектра, при котором человек испытывает непреодолимую тревогу перед обычными жизненными требованиями.
+                </p>
+                <p>
+                    Главная особенность этого состояния заключается в потребности жестко контролировать ситуацию. Этот контроль служит защитным механизмом для снижения зашкаливающего уровня стресса от ожиданий окружающих.
+                </p>
+                <div class="bg-zinc-800/50 border border-zinc-700/50 rounded-2xl p-6">
+                    <h3 class="text-white font-bold mb-2">Как проходить тест:</h3>
+                    <ul class="list-disc list-inside space-y-2 text-zinc-400">
+                        <li>Тест состоит из 26 утверждений.</li>
+                        <li>Оценивайте каждое утверждение исходя из того, насколько оно описывает ваше поведение за последние шесть месяцев.</li>
+                        <li>Здесь нет правильных или неправильных ответов: важна лишь ваша искренность.</li>
+                    </ul>
+                </div>
+                <div class="text-sm text-zinc-500 mt-6 border-t border-zinc-800/50 pt-4">
+                    Этот тест носит информационный и рекомендательный характер, не является диагнозом и не заменяет консультацию специалиста. 
+                    Тест НЕ сохраняет ничего на серверах, хранит временные данные локально в вашем браузере и обнулится при обновлении страницы.
+                </div>
+            </div>
+
+            <button onclick="startQuiz()" class="w-full sm:w-auto px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/25 outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-zinc-900">
+                Начать тестирование
+            </button>
+        </div>
+    </div>
+
+    <!-- QUIZ VIEW -->
+    <div id="quiz-view" class="hidden-view flex-1 flex flex-col py-8 px-4 sm:px-6">
+        <div class="max-w-2xl w-full mx-auto flex-1 flex flex-col">
+            
+            <!-- Header / Progress -->
+            <div class="mb-8 mt-4">
+                <div class="flex justify-between items-end mb-3">
+                    <div class="text-sm font-medium text-zinc-500">
+                        Вопрос <span id="current-question-num" class="text-white font-bold text-lg">1</span> из 26
+                    </div>
+                    <div id="progress-text" class="text-xs font-medium text-indigo-400">
+                        0% завершено
+                    </div>
+                </div>
+                <div class="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
+                    <div id="progress-bar" class="bg-indigo-500 h-full transition-all duration-300 ease-out rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="flex-1 flex flex-col justify-center pb-12">
+                <div id="question-container" class="animate-slide-up w-full">
+                    <h2 id="question-text" class="text-2xl sm:text-3xl font-medium text-white mb-8 leading-snug">
+                        <!-- Question text will be injected here -->
+                    </h2>
+                    
+                    <div id="options-container" class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                        <!-- Options will be injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Navigation -->
+            <div class="pt-6 border-t border-zinc-800/50 flex justify-between items-center">
+                <button onclick="prevQuestion()" id="back-button" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Назад
+                </button>
+                
+                <div class="text-zinc-600 text-sm">
+                    EDA-QA Test
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS VIEW -->
+    <div id="results-view" class="hidden-view flex-1 flex items-center justify-center py-12 px-4 sm:px-6">
+        <div class="max-w-3xl w-full bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-800 p-8 sm:p-12 animate-slide-up">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl font-bold text-zinc-400 mb-2">Ваш результат</h2>
+                <div class="text-7xl font-extrabold text-white my-4 tracking-tighter">
+                    <span id="final-score-display">0</span> <span class="text-2xl text-zinc-500 font-medium tracking-normal">/ 78</span>
+                </div>
+            </div>
+
+            <!-- Visual Scale -->
+            <div class="mb-12">
+                <div class="relative w-full h-6 bg-zinc-800 rounded-full overflow-hidden shadow-inner">
+                    <div id="result-bar-fill" class="absolute top-0 left-0 h-full transition-all duration-1000 ease-out rounded-full bg-indigo-500" style="width: 0%"></div>
+                    <!-- Threshold Marker -->
+                    <div id="result-threshold-marker" class="absolute top-0 bottom-0 w-1 bg-white/50 z-10" style="left: 57.69%"></div>
+                </div>
+                <div class="relative flex justify-between text-xs sm:text-sm text-zinc-500 font-medium mt-3">
+                    <span>0</span>
+                    <div class="absolute flex flex-col items-center" style="left: 57.69%; transform: translateX(-50%)">
+                        <span class="text-zinc-400">Порог (45)</span>
+                        <div class="h-2 w-0.5 bg-zinc-600 mt-1"></div>
+                    </div>
+                    <span>78</span>
+                </div>
+            </div>
+
+            <div class="bg-zinc-800/40 border border-zinc-700/50 rounded-2xl p-6 sm:p-8 mb-10">
+                <h3 class="text-xl font-bold text-white mb-4">Интерпретация:</h3>
+                
+                <div id="high-pda-result" class="hidden-view space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="mt-1 w-3 h-3 rounded-full bg-rose-500 flex-shrink-0"></div>
+                        <p class="text-zinc-300">
+                            <strong class="text-rose-400">Высокая вероятность наличия черт экстремального избегания требований.</strong>
+                        </p>
+                    </div>
+                    <p class="text-zinc-400 ml-6">
+                        Ваш результат 45 баллов или выше указывает на повышенный риск. Подобный балл говорит о том, что повседневные требования вызывают у вас сильную внутреннюю тревогу, для совладания с которой требуются специальные стратегии контроля. 
+                    </p>
+                    <p class="text-zinc-400 ml-6">
+                        Важно помнить: PDA является континуумом, и эти баллы стоит рассматривать как количественную оценку выраженности черт, а не формальный диагноз.
+                    </p>
+                </div>
+
+                <div id="low-pda-result" class="hidden-view space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="mt-1 w-3 h-3 rounded-full bg-indigo-400 flex-shrink-0"></div>
+                        <p class="text-zinc-300">
+                            <strong class="text-indigo-300">Балл ниже порога выраженных черт избегания требований.</strong>
+                        </p>
+                    </div>
+                    <p class="text-zinc-400 ml-6">
+                        Ваш результат находится ниже порогового значения в 45 баллов. Скорее всего, ваше сопротивление требованиям представляет собой обычную реакцию на стресс. 
+                    </p>
+                    <p class="text-zinc-400 ml-6">
+                        Однако стоит отметить: более низкие баллы не обязательно полностью исключают элементы PDA. Иногда избегающие черты оказываются более скрытыми или компенсированными в повседневной жизни.
+                    </p>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-zinc-700/50">
+                    <p class="text-sm text-zinc-500 leading-relaxed">
+                        <strong class="text-zinc-400">Обратите внимание:</strong> данный опросник не должен рассматриваться как самостоятельный диагностический тест. Если результаты вызывают у вас беспокойство, рекомендуется обсудить их со специалистом.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <button onclick="resetQuiz()" class="px-8 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-600">
+                    Пройти тест заново
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // Data
+        const QUESTIONS = [
+            "Я маниакально сопротивляюсь и избегаю обычных требований и просьб.",
+            "Я жалуюсь на болезнь или физическую неспособность, чтобы избежать просьбы или требования.",
+            "Мною движет потребность быть главным.",
+            "Повседневное давление (например, необходимость пойти в магазин или к стоматологу) кажется мне невыносимо напряженным.",
+            "Я указываю другим людям, как они должны себя вести, но не считаю, что эти правила применимы ко мне.",
+            "Я копирую манеры и стили других людей (например, использую фразы, перенятые у других, чтобы выражать свои мысли).",
+            "Мне трудно выполнять требования и просьбы других людей, если они не преподносятся очень осторожно.",
+            "Я примеряю на себя роли или персонажей (из телевизора или реальной жизни) и отыгрываю их.",
+            "Я почти не испытываю стыда или смущения (например, я могу устроить истерику на публике и не смущаться).",
+            "Я придумываю фантастические миры или игры и отыгрываю их.",
+            "Я умею обходить других и заставлять их делать то, что я хочу.",
+            "Я не осознаю или равнодушен к разнице между собой и авторитетными фигурами (например, родителями, учителями, полицией).",
+            "У меня все еще иногда случаются срывы (например, я могу кричать, устраивать истерику, бить или пинать), если я чувствую, что на меня давят.",
+            "Мне нравится, когда мне говорят, что я хорошо поработал.",
+            "У меня очень быстро меняется настроение (например, я могу в одно мгновение переключиться с нежности на гнев).",
+            "Я знаю, что сделать или сказать, чтобы расстроить определенных людей.",
+            "Я обвиняю или выбираю мишенью конкретного человека (или нескольких людей).",
+            "Я отрицаю то, что сделал, даже если меня поймали с поличным.",
+            "Я могу отвлекаться (быть поглощенным) изнутри (то есть быть погруженным в свой собственный мир).",
+            "Я прилагаю усилия, чтобы поддерживать свою репутацию среди других людей.",
+            "Иногда я использую возмутительное или шокирующее поведение, чтобы от чего-то отвязаться.",
+            "У меня бывают периоды, когда я демонстрирую крайне эмоциональные реакции (например, плачу/хихикаю, прихожу в ярость) на события, которые другие сочли бы незначительными.",
+            "Я слежу за тем, чтобы любое социальное взаимодействие происходило на моих собственных условиях.",
+            "Я предпочитаю взаимодействовать с другими в принятой на себя роли или общаться через реквизит или предметы.",
+            "Я стараюсь придираться и менять правила, установленные другими.",
+            "Я могу быть пассивным, и меня трудно вовлечь во что-либо."
+        ];
+
+        const OPTIONS = [
+            "Неверно",
+            "Иногда верно",
+            "В основном верно",
+            "Совершенно верно"
+        ];
+
+        // Items 14 and 20 (0-indexed: 13, 19) are reverse scored
+        const REVERSE_SCORED_INDICES = [13, 19];
+        const MAX_SCORE = 78;
+        const THRESHOLD = 45;
+
+        // State
+        let currentQ = 0;
+        let answers = Array(QUESTIONS.length).fill(null);
+
+        // DOM Elements
+        const views = {
+            intro: document.getElementById('intro-view'),
+            quiz: document.getElementById('quiz-view'),
+            results: document.getElementById('results-view')
+        };
+        const questionContainer = document.getElementById('question-container');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const currentQuestionNum = document.getElementById('current-question-num');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progressBar');
+        const backButton = document.getElementById('back-button');
+
+        // Functions
+        function switchView(viewName) {
+            Object.values(views).forEach(view => view.classList.add('hidden-view'));
+            views[viewName].classList.remove('hidden-view');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startQuiz() {
+            currentQ = 0;
+            answers = Array(QUESTIONS.length).fill(null);
+            switchView('quiz');
+            renderQuestion();
+        }
+
+        function resetQuiz() {
+            switchView('intro');
+        }
+
+        function triggerAnimation() {
+            questionContainer.classList.remove('animate-slide-up');
+            // Trigger reflow to restart animation
+            void questionContainer.offsetWidth;
+            questionContainer.classList.add('animate-slide-up');
+        }
+
+        function renderQuestion() {
+            triggerAnimation();
+
+            // Update Header
+            currentQuestionNum.textContent = currentQ + 1;
+            const progressPercentage = (currentQ / QUESTIONS.length) * 100;
+            progressText.textContent = `${Math.round(progressPercentage)}% завершено`;
+            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+
+            // Update Question
+            questionText.textContent = QUESTIONS[currentQ];
+
+            // Update Back Button
+            if (currentQ === 0) {
+                backButton.classList.remove('text-zinc-400', 'hover:text-white', 'hover:bg-zinc-800');
+                backButton.classList.add('text-zinc-600', 'hover:bg-zinc-900/50');
+            } else {
+                backButton.classList.remove('text-zinc-600', 'hover:bg-zinc-900/50');
+                backButton.classList.add('text-zinc-400', 'hover:text-white', 'hover:bg-zinc-800');
+            }
+
+            // Render Options
+            optionsContainer.innerHTML = '';
+            
+            const colorClasses = [
+                "hover:border-emerald-500 hover:bg-emerald-500/10 focus:ring-emerald-500",
+                "hover:border-emerald-400/70 hover:bg-emerald-400/10 focus:ring-emerald-400",
+                "hover:border-rose-400/70 hover:bg-rose-400/10 focus:ring-rose-400",
+                "hover:border-rose-500 hover:bg-rose-500/10 focus:ring-rose-500"
+            ];
+            
+            const selectedClasses = [
+                "bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-500/20",
+                "bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/20",
+                "bg-rose-500 border-rose-400 text-white shadow-lg shadow-rose-500/20",
+                "bg-rose-600 border-rose-500 text-white shadow-lg shadow-rose-500/20"
+            ];
+
+            OPTIONS.forEach((optionText, index) => {
+                const isSelected = answers[currentQ] === index;
+                const btn = document.createElement('button');
+                
+                let baseClasses = "flex-1 flex items-center justify-center px-4 py-4 sm:py-6 rounded-2xl border-2 text-sm sm:text-base font-semibold transition-all duration-200 outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-950 text-center leading-tight";
+                
+                if (isSelected) {
+                    btn.className = `${baseClasses} ${selectedClasses[index]}`;
+                } else {
+                    btn.className = `${baseClasses} bg-zinc-900 border-zinc-800 text-zinc-300 ${colorClasses[index]}`;
+                }
+
+                btn.textContent = optionText;
+                btn.onclick = () => selectOption(index);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectOption(optionIndex) {
+            answers[currentQ] = optionIndex;
+            renderQuestion(); // Re-render to show selection immediately
+
+            setTimeout(() => {
+                if (currentQ < QUESTIONS.length - 1) {
+                    currentQ++;
+                    renderQuestion();
+                } else {
+                    calculateScore();
+                }
+            }, 350); // slight delay for visual feedback
+        }
+
+        function prevQuestion() {
+            if (currentQ > 0) {
+                currentQ--;
+                renderQuestion();
+            } else {
+                switchView('intro');
+            }
+        }
+
+        function calculateScore() {
+            let score = 0;
+            answers.forEach((value, index) => {
+                if (value !== null) {
+                    if (REVERSE_SCORED_INDICES.includes(index)) {
+                        score += (3 - value);
+                    } else {
+                        score += value;
+                    }
+                }
+            });
+            showResults(score);
+        }
+
+        function showResults(score) {
+            document.getElementById('final-score-display').textContent = score;
+            
+            const scorePercent = (score / MAX_SCORE) * 100;
+            const isHighPDA = score >= THRESHOLD;
+            
+            const resultBarFill = document.getElementById('result-bar-fill');
+            resultBarFill.style.width = `${scorePercent}%`;
+            
+            if (isHighPDA) {
+                resultBarFill.classList.remove('bg-indigo-500');
+                resultBarFill.classList.add('bg-rose-500');
+                document.getElementById('high-pda-result').classList.remove('hidden-view');
+                document.getElementById('low-pda-result').classList.add('hidden-view');
+            } else {
+                resultBarFill.classList.remove('bg-rose-500');
+                resultBarFill.classList.add('bg-indigo-500');
+                document.getElementById('high-pda-result').classList.add('hidden-view');
+                document.getElementById('low-pda-result').classList.remove('hidden-view');
+            }
+
+            switchView('results');
+        }
+    </script>
+</body>
+</html>
